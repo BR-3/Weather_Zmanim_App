@@ -1,0 +1,170 @@
+header {
+    display:block;
+    background-color: #78afed;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: "Montserrat", Verdana, Geneva, Tahoma, sans-serif;
+    margin:0;
+    padding:0;
+}
+
+h1 {
+  color: #ffffff;
+  text-align: center;
+  width: 60%;
+  /* border-bottom: 2px solid #0056b3; */
+}
+
+p {
+  text-align: center;
+  font-size: 1.2em;
+  color: #495057;
+}
+
+/* logged in info styles */
+#locationTitle {
+  display:inline-block;
+}
+ 
+
+#loggedIn {
+  text-align: right;
+  font-weight: normal;
+  font-size: 16px;
+  color: black;
+}
+
+#loggedIn a {
+  color:black;
+}
+
+/* styles for user input search */
+#userInput {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+input[type="text"], input[type="date"] {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-right: 10px;
+  font-size: 1rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #357abd;
+}
+
+/* weather and zmanim results styles */
+.results {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+  line-height: 1.6;
+  text-align: center;
+
+}
+
+#locationHeader {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#location {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #4a90e2;
+}
+
+/* weather results styles */
+#weatherResults {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+#weatherResults h3 {
+  margin-top: 0;
+  color: #4a90e2;
+  font-size: 1.1rem;
+}
+
+#weatherResults p {
+  margin: 5px 0;
+}
+
+.high-temp {
+  color: #d9534f; /* Red for high temperatures */
+  font-weight: bold;
+}
+
+.low-temp {
+  color: #5bc0de; /* Blue for low temperatures */
+  font-weight: bold;
+}
+
+/* zmanim results styels */
+#zmanimResults {
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+#zmanimResults h3 {
+  margin-top: 0;
+  color: #4a90e2;
+  font-size: 1.1rem;
+}
+
+#zmanimResults h4, #zmanimResults h5, #zmanimResults h6 {
+  margin: 10px 0 5px 0;
+  color: #333;
+  font-weight: bold;
+}
+
+#zmanimResults p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+
+/* // <uniquifier>: Use a unique and descriptive class name
+// <weight>: Use a value from 100 to 900
+
+.montserrat-<uniquifier> {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+} */
