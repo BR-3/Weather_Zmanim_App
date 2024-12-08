@@ -4,10 +4,12 @@ body {
     margin:0;
     padding:0;
 }
-
 h1 {
-  color: #ffffff;
   text-align: center;
+}
+
+#locationTitle {
+  color: #ffffff;
   width: 60%;
   /* border-bottom: 2px solid #0056b3; */
 }

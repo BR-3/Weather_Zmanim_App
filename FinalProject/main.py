@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, render_template, request, session, redirect, url_for
 import os
 
+import requests
+
 from db.add_and_update import add_user_to_db, log_user_visit
 from db.connection import user_preferences
 from get_location.get_location import get_location_info
@@ -76,18 +78,16 @@ def update_preferences():
     default_location = data.get("defaultLocation")
     show_weather = data.get("showWeather")
     language = data.get("language")
-    reminders = data.get("reminders")
     notifications = data.get("notifications")
 
-    print(f"Location: {default_location}, Show Weather: {show_weather}, Language: {language}, Reminders: {reminders}, Notifications: {notifications}")
+    print(f"Location: {default_location}, Show Weather: {show_weather}, Language: {language}, Notifications: {notifications}")
 
     result = user_preferences.update_one(
         {"google_id":session['user']['id']},  
         {"$set": {
             "default_location": default_location,
             "show_weather": show_weather,
-            "language": language,  # Save the language preference
-            "reminders": reminders,  # Save the reminder preference
+            "language": language,
             "notifications": notifications
         }},
         upsert=True
@@ -119,3 +119,47 @@ def get_weather_and_zmanim():
         })
 
 
+from requests.auth import HTTPBasicAuth
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
+@app.route("/twilio")
+def twilio():
+    scheduler = BackgroundScheduler()
+    send_time = datetime(2024, 12, 8, 15, 50)  # Example: December 8, 2024, at 4 pm
+    scheduler.add_job(send_message, 'date', run_date=send_time)
+
+    scheduler.start()
+
+# Keep the script running so the scheduler can run in the background
+    try:
+        while True:
+            pass  # Keeps the script running indefinitely
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
+
+
+    return "success!"
+
+    
+
+def send_message():
+    X_RAPID_API_KEY = '6d2caefdfe96c5737a7b5b8e9f3f75f9'
+    TWILIO_PHONE_NUMBER = '+19177465798'
+    TO_NUMBER = '+19296097511'
+    SID = 'AC2971234654291b575ae9c6c249759e49'
+    MESSAGE_BODY = 'This is a one time scheduled message.'
+
+    url = "https://api.twilio.com/2010-04-01/Accounts/" + SID + "/Messages.json"
+
+    params = {
+        "From":TWILIO_PHONE_NUMBER,
+        "Body":MESSAGE_BODY,
+        "To":TO_NUMBER
+    }
+    basic = HTTPBasicAuth(SID,X_RAPID_API_KEY)
+    response = requests.post(url, auth=basic, data=params)
+
+    if response.status_code == 201:
+        print("Message sent successfully!")
+    else:
+        print(f"Failed to send message: {response.status_code} - {response.text}")

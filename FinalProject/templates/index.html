@@ -88,8 +88,9 @@
                         success: function (data) {
                             updateLocation(data.location);
                             updateZmanim(data.zmanim);
+                            
+                            // alert(preferences.show_weather);
                             checkIfUpdateWeather(data.weather);
-
                             // Save results to localStorage
                             localStorage.setItem("location", JSON.stringify(data.location));
                             localStorage.setItem("zmanim", JSON.stringify(data.zmanim));

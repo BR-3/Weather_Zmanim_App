@@ -14,8 +14,9 @@
         <a href="/account">Account</a>
         <a href="/logout">Logout</a>
     </div>
-
+    
     <div class="preferences-form">
+        <h1>Update Your Account Preferences</h1>
         <form id="preferencesForm">
             <!-- choose default location -->
             <label for="defaultLocation">Default Location (Zip Code):</label>
@@ -34,11 +35,7 @@
             </select>
 
             <!-- Reminder Notifications -->
-            <label for="reminders">Receive Reminder Notifications:</label>
-            <input type="checkbox" id="reminders" name="reminders" {{ 'checked' if user.reminders else '' }}>
-            <span id="remindersLabel">Yes</span>
-
-            <!-- Notification Types -->
+            <label for="notifications">Receive Reminder Notifications:</label>
             <div id="notificationTypes">
                 <label><input type="checkbox" name="notifications" value="mincha" {{ 'checked' if 'mincha' in user.notifications else '' }}> Mincha</label><br>
                 <label><input type="checkbox" name="notifications" value="shkia" {{ 'checked' if 'shkia' in user.notifications else '' }}> Shkia</label><br>
@@ -72,7 +69,6 @@
                         defaultLocation: defaultLocation,
                         showWeather: showWeather,
                         language: language,
-                        reminders: reminders,
                         notifications: notifications
                     }),
                     success: function(response) {
