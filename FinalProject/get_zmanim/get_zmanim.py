@@ -3,27 +3,29 @@ import requests
 
 
 def get_zmanim_info(date, zip_code):
-
     date = format_date_string(date)
 
     url = f"https://db.ou.org/zmanim/getCalendarData.php?mode=day&dateBegin={date}&zipCode={zip_code}"
-        
-    # fetch data from the zmanim api
-    zresponse = requests.get(url)
-    zresponse.raise_for_status()
 
-    #convert to json
-    zresponse = zresponse.json()
+    try: 
+        # fetch data from the zmanim api
+        response = requests.get(url)
+        response.raise_for_status()
 
-    # fixing the day of week
-    day = int(zresponse['dayOfWeek'])
-    zresponse['dayOfWeek'] = get_day_of_week(day)
+        zmanim_info = response.json()
 
-    # fixing english date
-    e_date = zresponse['engDateString']
-    zresponse['engDateString'] = format_date(e_date)
+        # fixing the day of week
+        day = int(zmanim_info['dayOfWeek'])
+        zmanim_info['dayOfWeek'] = get_day_of_week(day)
 
-    return zresponse
+        # fixing english date
+        english_date = zmanim_info['engDateString']
+        zmanim_info['engDateString'] = format_date(english_date)
+
+        return zmanim_info
+    except:
+        print(f"Error fetching zmanim data: {e}")
+        return {}
 
 
 def get_day_of_week(day_num): 
@@ -54,10 +56,8 @@ def get_day_of_week(day_num):
 def format_date(date):
     """
     Formats a date string in the format 'MM/DD/YYYY' to 'DD Month YYYY'.
-
     Args:
         date: The date string to format.
-
     Returns:
         The formatted date string.
     """

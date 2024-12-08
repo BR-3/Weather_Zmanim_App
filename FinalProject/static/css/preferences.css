@@ -1,0 +1,25 @@
+/* Preferences Page Styling */
+.preferences-form {
+    max-width: 600px;
+    margin-left: 220px; /* to account for the sidebar */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preferences-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.preferences-form input[type="text"],
+.preferences-form input[type="checkbox"] {
+    margin-bottom: 20px;
+    padding: 8px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+

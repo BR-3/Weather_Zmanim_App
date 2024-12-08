@@ -8,23 +8,36 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link rel = "stylesheet" href = "./static/styles.css">
-    <script src= "/static/jquery-3.7.1.min.js"></script>    
+    <link rel = "stylesheet" href = "./static/css/styles.css">
+    <link rel = "stylesheet" href = "./static/css/header.css">
+
+    <script src= "/static/js/jquery-3.7.1.min.js"></script>    
 </head>
 <body>
     <header>
-        
-        <div id="loggedInInfo">
-            {% if user %}
-            <p id="loggedIn">        
-                <img src="{{ user['picture'] }}" alt="User Picture" style="width: 50px; height: 50px; border-radius: 50%; vertical-align: middle;"><br>
-                Hello, {{ user['name'] }}! <br><a href="/logout">Logout</a></p>
+        <div id="headerContainer">
+            <h1 id="locationTitle">Zmanim and Weather For Your Location</h1>
+
+            <div id="loggedInInfo">
+                {% if user %}
+                <div class="userMenu">
+                    <img
+                        src="{{user['picture']}}"
+                        alt="User Picture"
+                        class="profilePic"
+                        onclick="toggleDropdown()">
+                    <div class="dropdownMenu" id="dropdownMenu">
+                        <p>Hello, {{user['name']}}<br></p>
+                        <a href="/account">Account</a>
+                        <a href="/preferences">Preferences</a>
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
                 {% else %}
-                <p id="loggedIn">Welcome!<br> <a href="/login">Login with Google</a></p>
+                <button type="submit" class="loginButton"  onclick="window.location.href='/login'">Login</button>
                 {% endif %}
+            </div>
         </div>
-        <h1 id="locationTitle">Zmanim and Weather For Your Location</h1>
-            
             
     </header>
     <p>Enter a zip code and date to find accurate zmanim and weather information for your location.</p>
@@ -35,161 +48,117 @@
         <button type="submit" id="locationSearch">Search</button>
     </form>
 
-    <div id="testget"></div>
-
     <div class = "results">
-        <div id="locationHeader">
-            <h2 id="location"></h2>
-        </div>
         <div id="weatherResults"></div>
-
         <div id="zmanimResults"> </div>
     </div>
 
 
     <script>
-        $(document).ready(function() {
-            $(".results").hide();
-            $("#weatherInfo").hide();
-            $("#zmanimInfo").hide();
+        $(document).ready(function () {
+            if (!localStorage.getItem("isFirstRun")) {
+                localStorage.removeItem("weather");
+                localStorage.removeItem("zmanim");
+                localStorage.removeItem("location");
+                localStorage.setItem("isFirstRun", "true");
+                $('.results').hide();
+            }
+            // Load saved results from localStorage
+            if (localStorage.getItem("isFirstRun") === "true") {
+                loadSavedResults();
+            }
 
-            $("#locationSearch").click(function(event) {
-                event.preventDefault(); // avoiding default for button press
-                
+            $("#locationSearch").click(function (event) {
+                event.preventDefault(); // Prevent default form submission
+
                 var zipCode = $("#userLocationInput").val();
                 var date = $("#dateEntry").val();
-                
-                // check if inputs are filled
-                if(zipCode != "" || date != "") {
-                    $(".results").show(); // displaying the results
-                    // try to get all together
+
+                // Check if inputs are filled
+                if (zipCode !== "" && date !== "") {
+                    // Display the results container
+                    $(".results").show();
+
+                    // AJAX request
                     $.ajax({
                         url: '/get_weather_and_zmanim',
                         type: 'GET',
-                        data: {
-                            zipCode: zipCode,
-                            date: date
-                        },
+                        data: { zipCode: zipCode, date: date },
                         dataType: 'json',
-                        success: function(data) {
-                            alert('received')  
+                        success: function (data) {
                             updateLocation(data.location);
                             updateZmanim(data.zmanim);
                             checkIfUpdateWeather(data.weather);
+
+                            // Save results to localStorage
+                            localStorage.setItem("location", JSON.stringify(data.location));
+                            localStorage.setItem("zmanim", JSON.stringify(data.zmanim));
+                            localStorage.setItem("weather", JSON.stringify(data.weather));
                         },
-                        error: function(error) {
-                            console.error('Error fetching Zmanim data:', error);
+                        error: function (error) {
+                            console.error('Error fetching Zmanim and Weather data:', error);
                         }
                     });
-
-                    // // send ajax request to get zmanim
-                    // $.ajax({
-                    //     url: '/get_zmanim',
-                    //     type: 'GET',
-                    //     data: {
-                    //         zipCode: zipCode,
-                    //         date: date
-                    //     },
-                    //     dataType: 'json',
-                    //     success: function(data) {
-                    //         // print zmanim data
-                    //         updateZmanim(data);  
-                    //     },
-                    //     error: function(error) {
-                    //         console.error('Error fetching Zmanim data:', error);
-                    //     }
-                    // });
-
-                    // // send ajax request to get weather 
-                    // $.ajax({
-                    //     url: '/get_weather',
-                    //     type: 'GET',
-                    //     data: {  // Send zip code and date as data
-                    //         zipCode: zipCode,
-                    //         date: date
-                    //     },
-                    //     dataType: 'json',
-                    //     success: function(data) {
-                    //         if (Object.keys(data).length > 0) {
-                    //             // Process the weather data
-                    //             updateWeather(data);
-                    //         } else {
-                    //             $("#weatherResults").hide();
-                    //         }
-                                                
-                    //     },
-                    //     error: function(error) {
-                    //         console.error('Error fetching weather data:', error);
-                    //     }
-                    // });
-
-                    // // get location information
-                    // $.ajax({
-                    //     url:'/process_location',
-                    //     type: 'GET', 
-                    //     dataType:'json',
-                    //     data: {
-                    //         zipCode: zipCode
-                    //     },
-                    //     success: function(data) {
-                    //         var city = data.city;
-                    //         var state = data.state;
-                    //         var zipCode = data.zip_code;
-                    //         var timeZoneCode = data.time_zone_code;
-                    //         $("#locationTitle").text("Zmanim and Weather for " + city + ", " + state + " " +
-                    //         zipCode + " (" + timeZoneCode + ")");
-                    //     }
-                    // });
                 } else {
-                    alert("Please enter valid date and location.");
+                    alert("Please enter a valid date and location.");
                 }
             });
         });
+
+        // Load results from localStorage if they exist
+        function loadSavedResults() {
+            const savedLocation = localStorage.getItem("location");
+            const savedZmanim = localStorage.getItem("zmanim");
+            const savedWeather = localStorage.getItem("weather");
+
+            if (savedLocation && savedZmanim && savedWeather) {
+                updateLocation(JSON.parse(savedLocation));
+                updateZmanim(JSON.parse(savedZmanim));
+                updateWeather(JSON.parse(savedWeather));
+                $(".results").show();
+            }
+        }
 
         function updateLocation(data) {
             var city = data.city;
             var state = data.state;
             var zipCode = data.zip_code;
             var timeZoneCode = data.time_zone_code;
-            $("#locationTitle").text("Zmanim and Weather for " + city + ", " + state + " " +
-            zipCode + " (" + timeZoneCode + ")");
+            $("#locationTitle").text("Zmanim and Weather for " + city + ", " + state + " " + zipCode + " (" + timeZoneCode + ")");
         }
 
         function checkIfUpdateWeather(data) {
             if (Object.keys(data).length > 0) {
-                // Process the weather data
                 updateWeather(data);
             } else {
                 $("#weatherResults").hide();
             }
         }
 
-        function updateWeather(data){
-            // make it visible
+        function updateWeather(data) {
             $("#weatherInfo").show();
-            //loop through each day's data
+            var output = `<h2>Weather</h2>`;
+
             for (const day in data) {
                 const dayData = data[day];
                 var date = dayData.Date;
-                var hasPrecipitation = dayData.Day.hasPrecipitation;
+                var hasPrecipitation = dayData.Day.HasPrecipitation;
                 var comment = dayData.Day.IconPhrase;
                 var maxTemp = dayData.Temperature.Maximum.Value + "° " + dayData.Temperature.Maximum.Unit;
                 var minTemp = dayData.Temperature.Minimum.Value + "° " + dayData.Temperature.Minimum.Unit;
 
-                const output = `
-                    <h3>Weather for ${date}</h3>
-                    ${comment}<br>
-                    Precipitation: ${hasPrecipitation ? 'Yes' : 'No'} <br>
-                    High Temperature: ${maxTemp}<br>
-                    Low Temperature: ${minTemp}<br>
-                `
-                $("#weatherResults").html($("#weatherResults").html()+ output + "<br>");
-
+                output += `
+                    <h3>${date}</h3>
+                    <p>${comment}</p>
+                    <p>Precipitation: ${hasPrecipitation ? 'Yes' : 'No'} </p>
+                    <p class='high-temp'>High Temperature: ${maxTemp}</p>
+                    <p class='low-temp'>Low Temperature: ${minTemp}</p><br>
+                `;
             }
+            $("#weatherResults").html(output);
         }
 
         function updateZmanim(data) {
-            // make it visible
             $("#zmanimInfo").show();
 
             var day = data.dayOfWeek;
@@ -216,34 +185,35 @@
             var parsha = data.parsha_shabbos;
             var shabbosCandleLighting = data.candle_lighting_shabbos;
 
-            const output = `
-                <h3>Zmanim for ${day}, ${hebDate} / ${engDate}</h3>
-                Daf Yomi: ${dafYomi}<br>
-                Alos: ${alos}<br>
-                Sunrise: ${sunrise}<br>
-                Talis: ${talis}<br>
+            var output = `
+                <h2>Zmanim</h2>
+                <h3>${day}, ${hebDate} / ${engDate}</h3>
+                <p>Daf Yomi: ${dafYomi}</p>
+                <p>Alos: ${alos}</p>
+                <p>Sunrise: ${sunrise}</p>
+                <p>Talis: ${talis}</p>
                 <h5>End Time for Shema:</h5>
-                M"A: ${szsMA}<br>
-                Gra: ${szsGra}<br>
+                <p>M"A: ${szsMA}</p>
+                <p>Gra: ${szsGra}</p>
                 <h5>End Time for Tefila:</h5>
-                M"A: ${sztMA}<br>
-                Gra: ${sztGra}<br><br>
-                Mincha Gedola: ${minchaGedola}<br>
-                Mincha Ketana: ${minchaKetana}<br>
-                Plag HaMincha: ${plagHamincha}<br>
-                Shkia: ${shkia}<br>
+                <p>M"A: ${sztMA}</p>
+                <p>Gra: ${sztGra}</p>
+                <p>Mincha Gedola: ${minchaGedola}</p>
+                <p>Mincha Ketana: ${minchaKetana}</p>
+                <p>Plag HaMincha: ${plagHamincha}</p>
+                <p>Shkia: ${shkia}</p>
                 <h5>Tzeis HaKochavim</h5>
                 <h6>Degrees</h6>
-                595 Degrees: ${degrees595}<br>
-                850 Degrees: ${degrees850}<br>
+                <p>595 Degrees: ${degrees595}</p>
+                <p>850 Degrees: ${degrees850}</p>
                 <h6>Fixed</h6>
-                42 Minutes: ${min42}<br>
-                72 Minutes: ${min72}<br>
-
+                <p>42 Minutes: ${min42}</p>
+                <p>72 Minutes: ${min72}</p>
+                <br>
                 <h4>Shabbos:</h4>
-                This Week's Parsha: ${parsha}<br>
-                Candle Lighting for Shabbos: ${shabbosCandleLighting}
-            `
+                <p>This Week's Parsha: ${parsha}</p>
+                <p>Candle Lighting for Shabbos: ${shabbosCandleLighting}</p>
+            `;
             $("#zmanimResults").html(output);
         }
 

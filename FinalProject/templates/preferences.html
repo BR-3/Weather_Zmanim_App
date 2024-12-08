@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Account</title>
+    <link rel="stylesheet" href="./static/css/styles.css">
+    <link rel="stylesheet" href="./static/css/preferences.css">
+    <link rel="stylesheet" href="./static/css/sidebar.css">
+
+    <script src="/static/js/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/">Home</a>
+        <a href="/account">Account</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="preferences-form">
+        <form id="preferencesForm">
+            <!-- choose default location -->
+            <label for="defaultLocation">Default Location (Zip Code):</label>
+            <input type="text" id="defaultLocation" name="defaultLocation" value="{{ user.default_location }}" placeholder="Enter zip code">
+
+            <!-- show weather -->
+            <label for="showWeather">Display Weather Results:</label>
+            <input type="checkbox" id="showWeather" name="showWeather" {{ 'checked' if user.show_weather else '' }}>
+            <span id="weatherLabel">Yes</span>
+
+            <!-- Language Selection -->
+            <label for="language">Language:</label>
+            <select id="language" name="language">
+                <option value="en" {{ 'selected' if user.language == 'en' else '' }}>English</option>
+                <option value="he" {{ 'selected' if user.language == 'he' else '' }}>Hebrew</option>
+            </select>
+
+            <!-- Reminder Notifications -->
+            <label for="reminders">Receive Reminder Notifications:</label>
+            <input type="checkbox" id="reminders" name="reminders" {{ 'checked' if user.reminders else '' }}>
+            <span id="remindersLabel">Yes</span>
+
+            <!-- Notification Types -->
+            <div id="notificationTypes">
+                <label><input type="checkbox" name="notifications" value="mincha" {{ 'checked' if 'mincha' in user.notifications else '' }}> Mincha</label><br>
+                <label><input type="checkbox" name="notifications" value="shkia" {{ 'checked' if 'shkia' in user.notifications else '' }}> Shkia</label><br>
+                <label><input type="checkbox" name="notifications" value="maariv" {{ 'checked' if 'maariv' in user.notifications else '' }}> Maariv</label><br>
+            </div>
+
+            <button type="submit" id="savePreferences">Save Preferences</button>
+        </form>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $("#preferencesForm").submit(function(event) {
+                event.preventDefault();
+
+                var defaultLocation = $("#defaultLocation").val();
+                var showWeather = $("#showWeather").prop('checked');
+                var language = $("#language").val();
+                var reminders = $("#reminders").prop('checked');
+                var notifications = [];
+
+                $("input[name='notifications']:checked").each(function() {
+                    notifications.push($(this).val());
+                });
+                
+                $.ajax({
+                    url: '/update_preferences',
+                    type: 'POST',
+                    contentType: 'application/json', // Indicate that we're sending JSON
+                    accept: 'application/json',
+                    data: JSON.stringify({
+                        defaultLocation: defaultLocation,
+                        showWeather: showWeather,
+                        language: language,
+                        reminders: reminders,
+                        notifications: notifications
+                    }),
+                    success: function(response) {
+                        alert("Preferences updated successfully!");
+                    },
+                    error: function(error) {
+                        console.error("Error updating preferences:", error);
+                        alert("There was an error updating your preferences.");
+                    }
+                });
+            });
+
+            // Toggle display text based on the checkbox state
+            $("#showWeather").change(function() {
+                if ($(this).prop('checked')) {
+                    $("#weatherLabel").text("Yes");
+                } else {
+                    $("#weatherLabel").text("No");
+                }
+            });
+
+            $("#reminders").change(function() {
+                if ($(this).prop('checked')) {
+                    $("#remindersLabel").text("Yes");
+                } else {
+                    $("#remindersLabel").text("No");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
