@@ -1,6 +1,6 @@
 
-from flask import session
-from db.connection import users_collection
+from flask import g, session
+from db.connection import users_collection, user_preferences
 from datetime import datetime
 
 
@@ -29,3 +29,18 @@ def log_user_visit(page):
         {"google_id": id},
         {"$push": {"user_event_log": {"vist_time": visit_time, "page": page}}}
     )
+
+
+def add_preferences_to_db(default_location, default_date, show_weather, language, notifications):
+    result = user_preferences.update_one(
+            {"google_id": g.user['id']},  
+            {"$set": {
+                "default_location": default_location,
+                "default_date": default_date,
+                "show_weather": show_weather,
+                "language": language,
+                "notifications": notifications
+            }},
+            upsert=True
+        )
+    return result

@@ -43,8 +43,20 @@
     <p>Enter a zip code and date to find accurate zmanim and weather information for your location.</p>
 
     <form id="userInput">
-        <input type="text" placeholder="Enter zip code" id="userLocationInput" value="{{ g.preferences.default_location if preferences else ''}}">
-        <input type="date" id="dateEntry" name="dateEntry" value="{{ g.preferences.default_date.date if preferences else ''}}">
+        <input type="text" placeholder="Enter zip code" id="userLocationInput" value="{{ preferences.default_location if preferences else ''}}">
+         {% if preferences and preferences.default_date%}
+            {% if preferences.default_date.option == 'today' %}
+            <input type="date" id="dateEntry" name="dateEntry" class="today">
+            {%  elif preferences.default_date.option == 'tomorrow' %}
+            <input type="date" id="dateEntry" name="dateEntry" class="tomorrow">
+            {%  elif preferences.default_date.option == 'other' %}
+            <input type="date" id="dateEntry" name="dateEntry" value="{{ preferences.default_date.date }}">
+            {%elif preferences.default_date.option == 'none'%}
+            <input type="date" id="dateEntry" name="dateEntry">
+            {%endif%}
+        {%else%}
+            <input type="date" id="dateEntry" name="dateEntry">
+        {% endif%}
         <button type="submit" id="locationSearch">Search</button>
     </form>
 
@@ -56,27 +68,18 @@
 
     <script>
         $(document).ready(function () {
-            // if (!localStorage.getItem("isFirstRun")) {
-            //     localStorage.removeItem("weather");
-            //     localStorage.removeItem("zmanim");
-            //     localStorage.removeItem("location");
-            //     localStorage.setItem("isFirstRun", "true");
-                $('.results').hide();
-            // }
-            // // Load saved results from localStorage
-            // if (localStorage.getItem("isFirstRun") === "true") {
-            //     loadSavedResults();
-            // }
-
+            $('.results').hide();
+            $('.tomorrow').val(getTomorrow());
+            $('.today').val(getToday());
+            
             $("#locationSearch").click(function (event) {
-                event.preventDefault(); // Prevent default form submission
+                event.preventDefault();
 
                 var zipCode = $("#userLocationInput").val();
                 var date = $("#dateEntry").val();
-
+                
                 // Check if inputs are filled
                 if (zipCode !== "" && date !== "") {
-                    // Display the results container
                     $(".results").show();
 
                     // AJAX request
@@ -90,10 +93,6 @@
                             updateZmanim(data.zmanim);
                             
                             checkIfUpdateWeather(data.weather);
-                            // // Save results to localStorage
-                            // localStorage.setItem("location", JSON.stringify(data.location));
-                            // localStorage.setItem("zmanim", JSON.stringify(data.zmanim));
-                            // localStorage.setItem("weather", JSON.stringify(data.weather));
                         },
                         error: function (error) {
                             console.error('Error fetching Zmanim and Weather data:', error);
@@ -104,20 +103,17 @@
                 }
             });
         });
+        
+        function getToday(){
+            const today = new Date();
+            return today.toLocaleDateString('en-CA');
+        }
 
-        // Load results from localStorage if they exist
-        // function loadSavedResults() {
-        //     const savedLocation = localStorage.getItem("location");
-        //     const savedZmanim = localStorage.getItem("zmanim");
-        //     const savedWeather = localStorage.getItem("weather");
-
-        //     if (savedLocation && savedZmanim && savedWeather) {
-        //         updateLocation(JSON.parse(savedLocation));
-        //         updateZmanim(JSON.parse(savedZmanim));
-        //         updateWeather(JSON.parse(savedWeather));
-        //         $(".results").show();
-        //     }
-        // }
+        function getTomorrow() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            return tomorrow.toLocaleDateString('en-CA');
+        }
 
         function updateLocation(data) {
             var city = data.city;
@@ -126,19 +122,19 @@
             var timeZoneCode = data.time_zone_code;
             $("#locationTitle").text("Zmanim and Weather for " + city + ", " + state + " " + zipCode + " (" + timeZoneCode + ")");
         }
-
+        
         function checkIfUpdateWeather(data) {
                 if (Object.keys(data).length > 0) {
                     updateWeather(data);
                 } else {
                     $("#weatherResults").hide();
                 }
-        }
-
-        function updateWeather(data) {
-            $("#weatherInfo").show();
+            }
+            
+            function updateWeather(data) {
+                $("#weatherInfo").show();
             var output = `<h2>Weather</h2>`;
-
+            
             for (const day in data) {
                 const dayData = data[day];
                 var date = dayData.Date;
@@ -146,21 +142,21 @@
                 var comment = dayData.Day.IconPhrase;
                 var maxTemp = dayData.Temperature.Maximum.Value + "° " + dayData.Temperature.Maximum.Unit;
                 var minTemp = dayData.Temperature.Minimum.Value + "° " + dayData.Temperature.Minimum.Unit;
-
+                
                 output += `
-                    <h3>${date}</h3>
-                    <p>${comment}</p>
-                    <p>Precipitation: ${hasPrecipitation ? 'Yes' : 'No'} </p>
-                    <p class='high-temp'>High Temperature: ${maxTemp}</p>
-                    <p class='low-temp'>Low Temperature: ${minTemp}</p><br>
+                <h3>${date}</h3>
+                <p>${comment}</p>
+                <p>Precipitation: ${hasPrecipitation ? 'Yes' : 'No'} </p>
+                <p class='high-temp'>High Temperature: ${maxTemp}</p>
+                <p class='low-temp'>Low Temperature: ${minTemp}</p><br>
                 `;
             }
             $("#weatherResults").html(output);
         }
-
+        
         function updateZmanim(data) {
             $("#zmanimInfo").show();
-
+            
             var day = data.dayOfWeek;
             var hebDate = data.hebDateString;
             var engDate = data.engDateString;
@@ -184,21 +180,21 @@
 
             var parsha = data.parsha_shabbos;
             var shabbosCandleLighting = data.candle_lighting_shabbos;
-
+            
             var output = `
-                <h2>Zmanim</h2>
-                <h3>${day}, ${hebDate} / ${engDate}</h3>
-                <p>Daf Yomi: ${dafYomi}</p>
-                <p>Alos: ${alos}</p>
-                <p>Sunrise: ${sunrise}</p>
-                <p>Talis: ${talis}</p>
-                <h5>End Time for Shema:</h5>
-                <p>M"A: ${szsMA}</p>
-                <p>Gra: ${szsGra}</p>
-                <h5>End Time for Tefila:</h5>
-                <p>M"A: ${sztMA}</p>
-                <p>Gra: ${sztGra}</p>
-                <p>Mincha Gedola: ${minchaGedola}</p>
+            <h2>Zmanim</h2>
+            <h3>${day}, ${hebDate} / ${engDate}</h3>
+            <p>Daf Yomi: ${dafYomi}</p>
+            <p>Alos: ${alos}</p>
+            <p>Sunrise: ${sunrise}</p>
+            <p>Talis: ${talis}</p>
+            <h5>End Time for Shema:</h5>
+            <p>M"A: ${szsMA}</p>
+            <p>Gra: ${szsGra}</p>
+            <h5>End Time for Tefila:</h5>
+            <p>M"A: ${sztMA}</p>
+            <p>Gra: ${sztGra}</p>
+            <p>Mincha Gedola: ${minchaGedola}</p>
                 <p>Mincha Ketana: ${minchaKetana}</p>
                 <p>Plag HaMincha: ${plagHamincha}</p>
                 <p>Shkia: ${shkia}</p>
@@ -213,8 +209,8 @@
                 <h4>Shabbos:</h4>
                 <p>This Week's Parsha: ${parsha}</p>
                 <p>Candle Lighting for Shabbos: ${shabbosCandleLighting}</p>
-            `;
-            $("#zmanimResults").html(output);
+                `;
+                $("#zmanimResults").html(output);
         }
 
 

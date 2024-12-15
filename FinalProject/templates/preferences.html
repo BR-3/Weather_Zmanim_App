@@ -28,10 +28,10 @@
             <label for="defaultDate">Default Date:</label>
             <div id="dateOptions">
                 <!-- TODO: add to this  -->
-                <label><input type="radio" name="defaultDate" value="none" {{ 'checked' if not g.preferences.default_date or g.preferences.default_date == 'none' }}>None</label><br>
-                <label><input type="radio" name="defaultDate" value="today">Today</label><br>
-                <label><input type="radio" name="defaultDate" value="tomorrow"> Tomorrow</label><br>
-                <label><input type="radio" name="defaultDate" value="other">Other</label><br>
+                <label><input type="radio" name="defaultDate" value="none" {{ 'checked' if not preferences.default_date or preferences.default_date.option == 'none' }}>None</label><br>
+                <label><input type="radio" name="defaultDate" value="today" {{ 'checked' if preferences.default_date and preferences.default_date.option == 'today' }}>Today</label><br>
+                <label><input type="radio" name="defaultDate" value="tomorrow" {{ 'checked' if preferences.default_date and preferences.default_date.option == 'tomorrow' }}> Tomorrow</label><br>
+                <label><input type="radio" name="defaultDate" value="other" {{ 'checked' if preferences.default_date and preferences.default_date.option == 'other' }}>Other</label><br>
             </div>
             <input type="date" id="customDate" name="customDate" style="display: none;"><br><br>
 
@@ -111,15 +111,11 @@
 
             function getDefaultDateSelection() {
                 const selectedOption = $('input[name="defaultDate"]:checked').val();
-                
+                // todo fix so not send actual date
                 if (selectedOption === 'other') {
                     dateToSend =  $customDateInput.val();
-                } else if (selectedOption === 'today') {
-                    dateToSend = getToday();
-                } else if (selectedOption === 'tomorrow') {
-                    dateToSend = getTomorrow();
-                } else if (selectedOption === 'none') {
-                    dateToSend = '';
+                } else {
+                    dateToSend= '';
                 }
 
                 return {
@@ -133,7 +129,7 @@
             let dateSelection={};
             $dateRadios.on('change', function() {
                 const selectedOption = $('input[name="defaultDate"]:checked').val();
-                let dateToSend;
+                let dateToSend='';
                 if (selectedOption === 'other') {
                     $customDateInput.show();
                     $customDateInput.prop('required', true);
@@ -142,30 +138,12 @@
                     $customDateInput.hide();
                     $customDateInput.prop('required', false);
                     $customDateInput.val('');
-                    if(selectedOption === 'today') {
-                        dateToSend = getToday();
-                    } else if(selectedOption ==='tomorrow') {
-                        dateToSend = getTomorrow();
-                    }
                 }
                 dateSelection = {
                     option: selectedOption,
                     date: dateToSend
                 };
-            });
-
-            function getToday(){
-                const today = new Date();
-                return today.toLocaleDateString('en-CA');
-            }
-
-            function getTomorrow() {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                return tomorrow.toLocaleDateString('en-CA');
-            }
-
-            
+            });            
 
         });
     </script>
