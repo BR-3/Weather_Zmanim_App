@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, session, redirect, url_for
+from flask import Flask, jsonify, render_template, request, session, redirect, url_for, g
 import os
 
 import requests
@@ -8,7 +8,7 @@ from db.connection import user_preferences
 from get_location.get_location import get_location_info
 from get_weather.get_weather import get_weather_info
 from get_zmanim.get_zmanim import get_zmanim_info
-from oauth_login.oauth_login import get_authorization_url, handle_oauth_callback, logout_user
+from login.oauth_login import get_authorization_url, handle_oauth_callback, logout_user
 
 aw_api_key = os.getenv('aw_api_key')
 
@@ -16,17 +16,21 @@ aw_api_key = os.getenv('aw_api_key')
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "your_secret_key")
 
-
+# flask global user and preferences to load before each route
+@app.before_request
+def load_user():
+    g.user = session.get("user")
+    if g.user:
+        g.preferences = user_preferences.find_one({"google_id": g.user['id']})
+    else:
+        g.preferences = None
 
 @app.route('/')
 def home():
-    user = session.get("user")
-    if user:
+    if g.user:
         log_user_visit("/")
-        preferences = user_preferences.find_one({"google_id": user['id']})
-        print('preferences: ', preferences)
-        return render_template('index.html', user = user, preferences=preferences) 
-    return  render_template('index.html', user = None)
+        return render_template('index.html', user = g.user, preferences=g.preferences) 
+    return  render_template('index.html', user = None, preferences=None)
 
 
 @app.route("/login")
@@ -37,8 +41,8 @@ def login():
 @app.route("/callback")
 def callback():
     user_info = handle_oauth_callback()
-    session["user"] = user_info
-    add_user_to_db(user_info) #add user to db
+    session["user"] = user_info # set session
+    add_user_to_db(user_info)
     log_user_visit('/login')
     return redirect(url_for("home"))
 
@@ -51,41 +55,39 @@ def logout():
 
 @app.route("/account")
 def account():
-    user = session.get("user")
-    if not user:
+    if not g.user:
         return redirect(url_for('login'))
     log_user_visit("/account")
-    return render_template('account.html', user=user)
+    return render_template('account.html', user=g.user)
 
 
 @app.route("/preferences")
 def preferences():
-    user = session.get("user")
-    if not user:
+    if not g.user:
         return redirect(url_for('login'))
     log_user_visit("/preferences")
-    return render_template('preferences.html', user=user)
+    return render_template('preferences.html', user=g.user, preferences=g.preferences)
 
 
 @app.route("/update_preferences", methods=["POST"])
 def update_preferences():
-    user = session.get("user")
-    if not user:
+    if not g.user:
         return jsonify({"error": "User not logged in"}), 400
     
     data = request.get_json()
 
     default_location = data.get("defaultLocation")
+    default_date = data.get("defaultDate")
     show_weather = data.get("showWeather")
     language = data.get("language")
     notifications = data.get("notifications")
 
-    print(f"Location: {default_location}, Show Weather: {show_weather}, Language: {language}, Notifications: {notifications}")
-
+    print(f"Location: {default_location}, date: {default_date}, Show Weather: {show_weather}, Language: {language}, Notifications: {notifications}")
     result = user_preferences.update_one(
-        {"google_id":session['user']['id']},  
+        {"google_id": g.user['id']},  
         {"$set": {
             "default_location": default_location,
+            "default_date": default_date,
             "show_weather": show_weather,
             "language": language,
             "notifications": notifications
@@ -110,7 +112,11 @@ def get_weather_and_zmanim():
 
     location_info =  get_location_info(zip_code = zip_code)
     zmanim_info = get_zmanim_info(date, zip_code)
-    weather_info = get_weather_info(location_info['location_key'], date)
+
+    if g.preferences['show_weather']== True:
+       weather_info = get_weather_info(location_info['location_key'], date)
+    else:
+        weather_info = {}
 
     return jsonify({
         'location':location_info, 
@@ -122,27 +128,21 @@ def get_weather_and_zmanim():
 from requests.auth import HTTPBasicAuth
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
+scheduler = BackgroundScheduler()
 @app.route("/twilio")
 def twilio():
-    scheduler = BackgroundScheduler()
-    send_time = datetime(2024, 12, 8, 15, 50)  # Example: December 8, 2024, at 4 pm
+    print("received request to schedule message")
+    send_time = datetime(2024, 12, 9, 12, 20)  # Example: December 8, 2024, at 4 pm
     scheduler.add_job(send_message, 'date', run_date=send_time)
-
+    print("message scheduled for ", send_time)
     scheduler.start()
-
-# Keep the script running so the scheduler can run in the background
-    try:
-        while True:
-            pass  # Keeps the script running indefinitely
-    except (KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
-
 
     return "success!"
 
     
 
 def send_message():
+    print("executing message send")
     X_RAPID_API_KEY = '6d2caefdfe96c5737a7b5b8e9f3f75f9'
     TWILIO_PHONE_NUMBER = '+19177465798'
     TO_NUMBER = '+19296097511'
@@ -157,6 +157,7 @@ def send_message():
         "To":TO_NUMBER
     }
     basic = HTTPBasicAuth(SID,X_RAPID_API_KEY)
+    print(f"Sending request to {url} with params: {params}")
     response = requests.post(url, auth=basic, data=params)
 
     if response.status_code == 201:

@@ -19,15 +19,15 @@
             <h1 id="locationTitle">Zmanim and Weather For Your Location</h1>
 
             <div id="loggedInInfo">
-                {% if user %}
+                {% if g.user %}
                 <div class="userMenu">
                     <img
-                        src="{{user['picture']}}"
+                        src="{{g.user['picture']}}"
                         alt="User Picture"
                         class="profilePic"
                         onclick="toggleDropdown()">
                     <div class="dropdownMenu" id="dropdownMenu">
-                        <p>Hello, {{user['name']}}<br></p>
+                        <p>Hello, {{g.user['name']}}<br></p>
                         <a href="/account">Account</a>
                         <a href="/preferences">Preferences</a>
                         <a href="/logout">Logout</a>
@@ -43,8 +43,8 @@
     <p>Enter a zip code and date to find accurate zmanim and weather information for your location.</p>
 
     <form id="userInput">
-        <input type="text" placeholder="Enter zip code" id="userLocationInput">
-        <input type="date" id="dateEntry" name="dateEntry">
+        <input type="text" placeholder="Enter zip code" id="userLocationInput" value="{{ g.preferences.default_location if preferences else ''}}">
+        <input type="date" id="dateEntry" name="dateEntry" value="{{ g.preferences.default_date.date if preferences else ''}}">
         <button type="submit" id="locationSearch">Search</button>
     </form>
 
@@ -56,17 +56,17 @@
 
     <script>
         $(document).ready(function () {
-            if (!localStorage.getItem("isFirstRun")) {
-                localStorage.removeItem("weather");
-                localStorage.removeItem("zmanim");
-                localStorage.removeItem("location");
-                localStorage.setItem("isFirstRun", "true");
+            // if (!localStorage.getItem("isFirstRun")) {
+            //     localStorage.removeItem("weather");
+            //     localStorage.removeItem("zmanim");
+            //     localStorage.removeItem("location");
+            //     localStorage.setItem("isFirstRun", "true");
                 $('.results').hide();
-            }
-            // Load saved results from localStorage
-            if (localStorage.getItem("isFirstRun") === "true") {
-                loadSavedResults();
-            }
+            // }
+            // // Load saved results from localStorage
+            // if (localStorage.getItem("isFirstRun") === "true") {
+            //     loadSavedResults();
+            // }
 
             $("#locationSearch").click(function (event) {
                 event.preventDefault(); // Prevent default form submission
@@ -89,12 +89,11 @@
                             updateLocation(data.location);
                             updateZmanim(data.zmanim);
                             
-                            // alert(preferences.show_weather);
                             checkIfUpdateWeather(data.weather);
-                            // Save results to localStorage
-                            localStorage.setItem("location", JSON.stringify(data.location));
-                            localStorage.setItem("zmanim", JSON.stringify(data.zmanim));
-                            localStorage.setItem("weather", JSON.stringify(data.weather));
+                            // // Save results to localStorage
+                            // localStorage.setItem("location", JSON.stringify(data.location));
+                            // localStorage.setItem("zmanim", JSON.stringify(data.zmanim));
+                            // localStorage.setItem("weather", JSON.stringify(data.weather));
                         },
                         error: function (error) {
                             console.error('Error fetching Zmanim and Weather data:', error);
@@ -107,18 +106,18 @@
         });
 
         // Load results from localStorage if they exist
-        function loadSavedResults() {
-            const savedLocation = localStorage.getItem("location");
-            const savedZmanim = localStorage.getItem("zmanim");
-            const savedWeather = localStorage.getItem("weather");
+        // function loadSavedResults() {
+        //     const savedLocation = localStorage.getItem("location");
+        //     const savedZmanim = localStorage.getItem("zmanim");
+        //     const savedWeather = localStorage.getItem("weather");
 
-            if (savedLocation && savedZmanim && savedWeather) {
-                updateLocation(JSON.parse(savedLocation));
-                updateZmanim(JSON.parse(savedZmanim));
-                updateWeather(JSON.parse(savedWeather));
-                $(".results").show();
-            }
-        }
+        //     if (savedLocation && savedZmanim && savedWeather) {
+        //         updateLocation(JSON.parse(savedLocation));
+        //         updateZmanim(JSON.parse(savedZmanim));
+        //         updateWeather(JSON.parse(savedWeather));
+        //         $(".results").show();
+        //     }
+        // }
 
         function updateLocation(data) {
             var city = data.city;
@@ -129,11 +128,11 @@
         }
 
         function checkIfUpdateWeather(data) {
-            if (Object.keys(data).length > 0) {
-                updateWeather(data);
-            } else {
-                $("#weatherResults").hide();
-            }
+                if (Object.keys(data).length > 0) {
+                    updateWeather(data);
+                } else {
+                    $("#weatherResults").hide();
+                }
         }
 
         function updateWeather(data) {

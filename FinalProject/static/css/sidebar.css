@@ -23,3 +23,7 @@
 .sidebar a:hover {
     background-color: #34495e;
 }
+
+.sidebar a.current {
+    background-color: #4a90e2;
+}

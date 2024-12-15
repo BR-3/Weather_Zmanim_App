@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import os, requests
 
-
 def get_weather_info(location_key, date):
     """
     Fetches weather information for a given location key and date.
