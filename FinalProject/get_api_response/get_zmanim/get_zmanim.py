@@ -24,7 +24,7 @@ def get_zmanim_info(date, zip_code):
 
         return zmanim_info
     except:
-        print(f"Error fetching zmanim data: {e}")
+        print(f"Error fetching zmanim data")
         return {}
 
 

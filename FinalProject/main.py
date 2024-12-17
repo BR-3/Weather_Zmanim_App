@@ -1,40 +1,24 @@
-from flask import Flask, jsonify, render_template, request, session, redirect, url_for, g
+from flask import Flask, render_template, request, session, redirect, url_for, g
 
 import os
 
 from db.add_and_update import add_user_to_db, log_user_visit
 from db.connection import user_preferences
-from get_location.get_location import get_location_info
-from get_weather.get_weather import get_weather_info
-from get_zmanim.get_zmanim import get_zmanim_info
+from get_api_response.get_weather_and_zmanim import get_api_response
 from login.oauth_login import get_authorization_url, handle_oauth_callback, logout_user
 from preferences.update_preferences import update_user_preferences
+from setup_app import check_authentication, load_user
 
 aw_api_key = os.getenv('aw_api_key')
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "your_secret_key")
 
-protected_paths = ['/account', '/preferences']
 
-# flask global user and preferences to load before each route
 @app.before_request
-def load_user():
-    g.user = session.get("user")
-    g.route = request.path
-    if g.user:
-        log_user_visit(g.route)
-        g.preferences = user_preferences.find_one({"google_id": g.user['id']})
-    else:
-        g.preferences = None
-        g.user = None
-
-
-@app.before_request 
-def check_authentication(): 
-    if request.path in protected_paths: 
-        if not g.user: 
-            return redirect(url_for('login'))
+def setup_app():
+    load_user()
+    check_authentication()
 
 
 @app.route('/')
@@ -76,22 +60,8 @@ def get_weather_and_zmanim():
     date = request.args.get('date')
     zip_code = request.args.get('zipCode')
 
-    if not date or not zip_code:
-       return jsonify({'error': 'Missing zip_code or date'}), 400
-
-    location_info =  get_location_info(zip_code = zip_code)
-    zmanim_info = get_zmanim_info(date, zip_code)
-
-    if g.preferences['show_weather']== True:
-       weather_info = get_weather_info(location_info['location_key'], date)
-    else:
-        weather_info = {}
-
-    return jsonify({
-        'location':location_info, 
-        'zmanim':zmanim_info, 
-        'weather':weather_info
-        })
+    response = get_api_response(date, zip_code)
+    return response
 
 
 @app.route("/update_preferences", methods=["POST"])
