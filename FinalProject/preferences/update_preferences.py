@@ -8,12 +8,13 @@ def update_user_preferences(data):
     show_weather = data.get("showWeather")
     language = data.get("language")
     notifications = data.get("notifications")
+    notification_number = data.get("notificationNumber")
 
-    result = add_preferences_to_db(default_location=default_location, default_date=default_date,show_weather=show_weather, language=language, notifications=notifications)
+    result = add_preferences_to_db(default_location=default_location, default_date=default_date,show_weather=show_weather, language=language, notifications=notifications, notification_number=notification_number)
 
     if result.upserted_id:  # If an insert happened
         return jsonify({"message": "Preferences saved successfully (new user)!"}), 200
     elif result.modified_count > 0:  # If an update happened
         return jsonify({"message": "Preferences updated successfully!"}), 200
     else:
-        return jsonify({"error": "No changes were made to preferences"}), 400
+        return jsonify({"message": "No changes were made to preferences"}), 304
