@@ -32,7 +32,6 @@ def log_user_visit(page):
 
 
 def add_preferences_to_db(default_location, default_date, show_weather, language, notifications, notification_number):
-    # current_preferences = user_preferences.find_one({"google_id": g.user['id']})
 
     new_data = {
         "default_location": default_location,
@@ -43,10 +42,6 @@ def add_preferences_to_db(default_location, default_date, show_weather, language
         "notification_number": notification_number
     }
 
-    # if current_preferences and all(current_preferences.get(key) == value for key, value in new_data.items()):
-    #     print("no changes detected")
-    #     return {"message": "No changes detected", "modified_count": 0}
-    
     result = user_preferences.update_one(
             {"google_id": g.user['id']},  
             {"$set": new_data },

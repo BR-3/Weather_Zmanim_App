@@ -7,3 +7,4 @@ db = client["zmanim_and_weather"]
 
 users_collection = db["users"]
 user_preferences = db["user_preferences"]
+notifications_collection = db["notifications"]

@@ -2,21 +2,27 @@ from flask import Flask, render_template, request, session, redirect, url_for, g
 
 import os
 
-from db.add_and_update import add_user_to_db, log_user_visit
-from db.connection import user_preferences
+from db.add_and_update import add_user_to_db
+from db.connection import notifications_collection
 from get_api_response.get_weather_and_zmanim import get_api_response
 from login.oauth_login import get_authorization_url, handle_oauth_callback, logout_user
 from preferences.update_preferences import update_user_preferences
+from preferences.send_notifications import setup_notifications
 from setup_app import check_authentication, load_user
+
 
 aw_api_key = os.getenv('aw_api_key')
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "your_secret_key")
+app.initialized = False
 
 
 @app.before_request
 def setup_app():
+    if not app.initialized: 
+        app.initialized = True 
+        setup_notifications(notifications_collection)
     load_user()
     check_authentication()
 
@@ -34,7 +40,7 @@ def login():
 @app.route("/callback")
 def callback():
     user_info = handle_oauth_callback()
-    session["user"] = user_info # set session
+    session["user"] = user_info
     add_user_to_db(user_info)
     return redirect(url_for("home"))
 
@@ -59,7 +65,6 @@ def preferences():
 def get_weather_and_zmanim():
     date = request.args.get('date')
     zip_code = request.args.get('zipCode')
-
     response = get_api_response(date, zip_code)
     return response
 

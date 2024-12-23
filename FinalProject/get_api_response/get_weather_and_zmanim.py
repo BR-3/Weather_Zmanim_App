@@ -9,7 +9,7 @@ def get_api_response(date, zip_code):
     if input_validation is not None:
         return input_validation
 
-    location_info =  get_location_info(zip_code = zip_code)
+    location_info = get_location_info(zip_code = zip_code)
     zmanim_info = get_zmanim_info(date, zip_code)
     weather_info = check_if_get_weather(location_info['location_key'], date)
     
