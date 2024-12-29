@@ -12,12 +12,12 @@ load_dotenv()
 
 scheduler = BackgroundScheduler()
 
-# def setup_daily_notifications():
-#     today = datetime.now()
-#     setup_notifications(user_preferences, notifications_collection)
+def setup_daily_notifications():
+    today = datetime.now()
+    setup_notifications(user_preferences, notifications_collection)
 
-# # Schedule to run every day at midnight
-# scheduler.add_job(setup_daily_notifications, CronTrigger(hour=0, minute=0, second=0))
+# Schedule to run every day at midnight
+scheduler.add_job(setup_daily_notifications, CronTrigger(hour=0, minute=0, second=0))
 
 
 def setup_notifications(user_preferences, notifications_collection):
