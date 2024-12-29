@@ -13,7 +13,6 @@ load_dotenv()
 scheduler = BackgroundScheduler()
 
 def setup_daily_notifications():
-    today = datetime.now()
     setup_notifications(user_preferences, notifications_collection)
 
 # Schedule to run every day at midnight
