@@ -14,7 +14,7 @@ def get_zmanim_info(date, zip_code):
         response.raise_for_status()
 
         zmanim_info = format_zmanim_response(response.json())
-        add_notifications_to_db(zmanim_info)
+        # add_notifications_to_db(zmanim_info)
         return zmanim_info
     except:
         print(f"Error fetching zmanim data")
@@ -24,8 +24,11 @@ def add_notifications_to_db(zmanim_info):
     if g.preferences:
         notifications = g.preferences.get('notifications')
         if notifications is not None:
+            zip_code = g.preferences.get('default_location')
+
             if('shkia' in notifications):
                 notification_info = {
+                    'notification_location': zip_code,
                     'notification_type': 'shkia',
                     'notification_time': zmanim_info['zmanim']['sunset'],
                     'notification_number': g.preferences.get('notification_number'),

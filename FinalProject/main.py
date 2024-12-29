@@ -3,11 +3,10 @@ from flask import Flask, render_template, request, session, redirect, url_for, g
 import os
 
 from db.add_and_update import add_user_to_db
-from db.connection import notifications_collection
 from get_api_response.get_weather_and_zmanim import get_api_response
 from login.oauth_login import get_authorization_url, handle_oauth_callback, logout_user
 from preferences.update_preferences import update_user_preferences
-from preferences.send_notifications import setup_notifications
+from preferences.notifications.send_notifications import start_scheduler
 from setup_app import check_authentication, load_user
 
 
@@ -22,7 +21,7 @@ app.initialized = False
 def setup_app():
     if not app.initialized: 
         app.initialized = True 
-        setup_notifications(notifications_collection)
+        start_scheduler()
     load_user()
     check_authentication()
 

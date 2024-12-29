@@ -48,11 +48,25 @@
             </select></label><br>
 
             <!-- Reminder Notifications -->
-            <label for="notifications">Receive Reminder Notifications:
             <div id="notificationTypes">
-                <label><input type="checkbox" name="notifications" value="mincha" {{ 'checked' if 'mincha' in g.preferences.notifications else '' }}> Mincha</label><br>
+                <label for="notifications">Receive Reminder Notifications:
                 <label><input type="checkbox" name="notifications" value="shkia" {{ 'checked' if 'shkia' in g.preferences.notifications else '' }}> Shkia</label><br>
-                <label><input type="checkbox" name="notifications" value="maariv" {{ 'checked' if 'maariv' in g.preferences.notifications else '' }}> Maariv</label><br>
+                <label><input type="checkbox" name="notifications" value="sunrise" {{ 'checked' if 'sunrise' in g.preferences.notifications else '' }}> Sunrise</label><br>
+                <label><input type="checkbox" name="notifications" value="szsMA" {{ 'checked' if 'szsMA' in g.preferences.notifications else '' }}> End time Shema (M"A)</label><br>
+                <label><input type="checkbox" name="notifications" value="szsGRA" {{ 'checked' if 'szsGRA' in g.preferences.notifications else '' }}> End time Shema (GRA)</label><br>
+                <label><input type="checkbox" name="notifications" value="sztMA" {{ 'checked' if 'sztMA' in g.preferences.notifications else '' }}> End time shacharis (M"A)</label><br>
+                <label><input type="checkbox" name="notifications" value="sztGRA" {{ 'checked' if 'sztGRA' in g.preferences.notifications else '' }}> End time shacharis (GRA)</label><br>
+                <label><input type="checkbox" name="notifications" value="alos" {{ 'checked' if 'alos' in g.preferences.notifications else '' }}> Alos Hashachar</label><br>
+                <label><input type="checkbox" name="notifications" value="talis" {{ 'checked' if 'talis' in g.preferences.notifications else '' }}> Talis</label><br>
+                <label><input type="checkbox" name="notifications" value="chatzos" {{ 'checked' if 'chatzos' in g.preferences.notifications else '' }}> Chatzos</label><br>
+                <label><input type="checkbox" name="notifications" value="minchaGedola" {{ 'checked' if 'minchaGedola' in g.preferences.notifications else '' }}> Mincha Gedola</label><br>
+                <label><input type="checkbox" name="notifications" value="minchaKetana" {{ 'checked' if 'minchaKetana' in g.preferences.notifications else '' }}>Mincha Ketana</label><br>
+                <label><input type="checkbox" name="notifications" value="plagHamincha" {{ 'checked' if 'plagHamincha' in g.preferences.notifications else '' }}>Plag Hamincha</label><br>
+                <label><input type="checkbox" name="notifications" value="degrees595" {{ 'checked' if 'degrees595' in g.preferences.notifications else '' }}> Tzeis Hakochavim (595 degrees)</label><br>
+                <label><input type="checkbox" name="notifications" value="degrees850" {{ 'checked' if 'degrees850' in g.preferences.notifications else '' }}>Tzeis Hakochavim (850 degrees)</label><br>
+                <label><input type="checkbox" name="notifications" value="min42" {{ 'checked' if 'min42' in g.preferences.notifications else '' }}>Tzeis Hakochavim (42 minutes)</label><br>
+                <label><input type="checkbox" name="notifications" value="min72" {{ 'checked' if 'min72' in g.preferences.notifications else '' }}> Tzeis Hakochavim (72 minutes)</label><br>
+                <label><input type="checkbox" name="notifications" value="dafYomi" {{ 'checked' if 'dafYomi' in g.preferences.notifications else '' }}> Daf Yomi</label><br>
             </div></label>
 
             <label for="notificationNumber">Phone Number for Notifications:
@@ -64,6 +78,8 @@
     </div>
     <script>
         $(document).ready(function() {
+            toggleNotificationSection();
+
             $("#preferencesForm").submit(function(event) {
                 event.preventDefault();
 
@@ -101,7 +117,6 @@
                 });
             });
 
-            // Toggle display text based on the checkbox state
             $("#showWeather").change(function() {
                 if ($(this).prop('checked')) {
                     $("#weatherLabel").text("Yes");
@@ -110,6 +125,17 @@
                 }
             });
 
+            function toggleNotificationSection() {
+                var notificationNumber = $('#notificationNumber').val();
+                var defaultLocation = $("#defaultLocation").val();
+                
+                if (notificationNumber && defaultLocation) {
+                    $("#notificationTypes").show(); // Show notifications section if both are filled
+                } else {
+                    $("#notificationTypes").hide(); // Hide notifications section if either is missing
+                }
+            }
+
             function getNotificationSelection() {
                 notifications = [];
                 $("input[name='notifications']:checked").each(function() {
@@ -117,6 +143,10 @@
                 });
                 return notifications;
             }
+
+            $('#notificationNumber, #defaultLocation').on('input', function() {
+                toggleNotificationSection();
+            });
 
             function getDefaultDateSelection() {
                 const selectedOption = $('input[name="defaultDate"]:checked').val();
