@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Account</title>
+    <link rel="stylesheet" href="./static/css/styles.css">
+    <link rel="stylesheet" href="./static/css/sidebar.css">
+    <link rel="stylesheet" href="./static/css/account.css">
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/">Home</a>
+        <a href="/account" class="current">Account</a>
+        <a href="/preferences">Preferences</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="account-content">
+        <h2>Account Information</h2>
+        <p><strong>Name:</strong> {{ user['name'] }}</p>
+        <p><strong>Email:</strong> {{ user['email'] }}</p>
+        {% if user['picture'] %}
+        <img src="{{ user['picture'] }}" alt="Profile Picture" class="profile-picture">
+        {% endif %}
+    </div>
+
+    <footer>
+        <a href="/">Back to Home</a>
+    </footer>
+</body>
+</html>

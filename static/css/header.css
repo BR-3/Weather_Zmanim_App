@@ -1,0 +1,107 @@
+
+/* header styles */
+header {
+    display:block;
+    background-color: #78afed;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #78afed;
+  padding: 10px 20px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+
+#locationTitle {
+  margin: 0;
+  margin-left:20px;
+  color: #ffffff;
+  font-size: 1.75rem;
+  text-align: left;
+}
+ 
+#loggedInInfo {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+#loggedIn {
+  text-align: right;
+  font-weight: normal;
+  font-size: 16px;
+  color: black;
+}
+
+#loggedIn a {
+  color:black;
+}
+
+.profilePic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+}
+
+/* Dropdown Menu */
+.dropdownMenu {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 150px;
+  text-align: left;
+  z-index: 1001;
+}
+
+.dropdownMenu p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 550;
+  text-align: left;
+  color: #333;
+}
+
+.dropdownMenu a {
+  display: block;
+  color: #495057;
+  text-decoration: none;
+  padding: 5px 0;
+  font-weight: 400;
+}
+
+.dropdownMenu a:hover {
+  color: #4a90e2;
+}
+
+/* Show Dropdown Menu */
+.userMenu:hover .dropdownMenu {
+  display: block;
+}
+
+/* styles for user input search */
+#userInput {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+

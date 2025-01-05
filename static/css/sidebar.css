@@ -1,0 +1,29 @@
+/* Sidebar Navigation */
+.sidebar {
+    width: 150px;
+    background-color: #78afed;
+    padding: 15px;
+    position: fixed;
+    height: 100%;
+    top: 0;
+    left: 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    padding: 10px;
+    text-decoration: none;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.sidebar a:hover {
+    background-color: #34495e;
+}
+
+.sidebar a.current {
+    background-color: #4a90e2;
+}

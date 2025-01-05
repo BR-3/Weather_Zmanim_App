@@ -1,0 +1,73 @@
+/* Preferences Page Styling */
+.preferences-form {
+    max-width: 600px;
+    margin-left: 220px;
+    margin-top: 30px;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.preferences-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.preferences-form input[type="text"] {
+    margin-bottom: 15px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #4a90e2; /* Dark blue */
+    font-size: 16px;
+}
+
+.preferences-form input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.preferences-form span {
+    font-size: 16px;
+    color: #555;
+}
+
+.preferences-form select {
+    margin-bottom: 20px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #4a90e2; /* Dark blue */
+    font-size: 16px;
+}
+
+#notificationTypes label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+button[type="submit"] {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #4a90e2; /* Dark blue */
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #78afed; /* Lighter blue on hover */
+}
+
+button[type="submit"]:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(72, 175, 237, 0.6); /* Light blue focus */
+}

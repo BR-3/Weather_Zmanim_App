@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Account</title>
+    <link rel="stylesheet" href="./static/css/styles.css">
+    <link rel="stylesheet" href="./static/css/preferences.css">
+    <link rel="stylesheet" href="./static/css/sidebar.css">
+
+    <script src="/static/js/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/">Home</a>
+        <a href="/account">Account</a>
+        <a href="/preferences" class="current">Preferences</a>
+        <a href="/logout" >Logout</a>
+    </div>
+    
+    <div class="preferences-form">
+        <h1>Update Your Account Preferences</h1>
+        <form id="preferencesForm">
+            <!-- choose default location -->
+            <label for="defaultLocation">Default Location (Zip Code):
+            <input type="text" id="defaultLocation" name="defaultLocation" value="{{ preferences.default_location }}" placeholder="Enter zip code">
+        </label><br><br>
+
+            <!-- choose default date -->
+            <label for="defaultDate">Default Date:
+            <div id="dateOptions">
+                <label><input type="radio" name="defaultDate" value="none" {{ 'checked' if not preferences.default_date or preferences.default_date.option == 'none' }}>None</label><br>
+                <label><input type="radio" name="defaultDate" value="today" {{ 'checked' if preferences.default_date and preferences.default_date.option == 'today' }}>Today</label><br>
+                <label><input type="radio" name="defaultDate" value="tomorrow" {{ 'checked' if preferences.default_date and preferences.default_date.option == 'tomorrow' }}> Tomorrow</label><br>
+                <label><input type="radio" name="defaultDate" value="other" {{ 'checked' if preferences.default_date and preferences.default_date.option == 'other' }}>Other</label><br>
+            </div>
+            <input type="date" id="customDate" name="customDate" style="display: none;"></label><br><br>
+
+            <!-- show weather -->
+            <label for="showWeather">Display Weather Results:
+            <input type="checkbox" id="showWeather" name="showWeather" {{ 'checked' if preferences.show_weather or not preferences.show_weather else '' }}></label>
+            <span id="weatherLabel">Yes</span>
+            <br><br><br>
+
+            <!-- Language Selection -->
+            <label for="language">Language:
+            <select id="language" name="language">
+                <option value="en" {{ 'selected' if preferences.language == 'en' else '' }}>English</option>
+                <option value="he" {{ 'selected' if preferences.language == 'he' else '' }}>Hebrew</option>
+            </select></label><br>
+
+            <!-- Reminder Notifications -->
+            <div id="notificationTypes">
+                <label for="notifications">Receive Reminder Notifications:
+                <label><input type="checkbox" name="notifications" value="shkia" {{ 'checked' if 'shkia' in preferences.notifications else '' }}> Shkia</label><br>
+                <label><input type="checkbox" name="notifications" value="sunrise" {{ 'checked' if 'sunrise' in preferences.notifications else '' }}> Sunrise</label><br>
+                <label><input type="checkbox" name="notifications" value="szsMA" {{ 'checked' if 'szsMA' in preferences.notifications else '' }}> End time Shema (M"A)</label><br>
+                <label><input type="checkbox" name="notifications" value="szsGRA" {{ 'checked' if 'szsGRA' in preferences.notifications else '' }}> End time Shema (GRA)</label><br>
+                <label><input type="checkbox" name="notifications" value="sztMA" {{ 'checked' if 'sztMA' in preferences.notifications else '' }}> End time shacharis (M"A)</label><br>
+                <label><input type="checkbox" name="notifications" value="sztGRA" {{ 'checked' if 'sztGRA' in preferences.notifications else '' }}> End time shacharis (GRA)</label><br>
+                <label><input type="checkbox" name="notifications" value="alos" {{ 'checked' if 'alos' in preferences.notifications else '' }}> Alos Hashachar</label><br>
+                <label><input type="checkbox" name="notifications" value="talis" {{ 'checked' if 'talis' in preferences.notifications else '' }}> Talis</label><br>
+                <label><input type="checkbox" name="notifications" value="chatzos" {{ 'checked' if 'chatzos' in preferences.notifications else '' }}> Chatzos</label><br>
+                <label><input type="checkbox" name="notifications" value="minchaGedola" {{ 'checked' if 'minchaGedola' in preferences.notifications else '' }}> Mincha Gedola</label><br>
+                <label><input type="checkbox" name="notifications" value="minchaKetana" {{ 'checked' if 'minchaKetana' in preferences.notifications else '' }}>Mincha Ketana</label><br>
+                <label><input type="checkbox" name="notifications" value="plagHamincha" {{ 'checked' if 'plagHamincha' in preferences.notifications else '' }}>Plag Hamincha</label><br>
+                <label><input type="checkbox" name="notifications" value="degrees595" {{ 'checked' if 'degrees595' in preferences.notifications else '' }}> Tzeis Hakochavim (595 degrees)</label><br>
+                <label><input type="checkbox" name="notifications" value="degrees850" {{ 'checked' if 'degrees850' in preferences.notifications else '' }}>Tzeis Hakochavim (850 degrees)</label><br>
+                <label><input type="checkbox" name="notifications" value="min42" {{ 'checked' if 'min42' in preferences.notifications else '' }}>Tzeis Hakochavim (42 minutes)</label><br>
+                <label><input type="checkbox" name="notifications" value="min72" {{ 'checked' if 'min72' in preferences.notifications else '' }}> Tzeis Hakochavim (72 minutes)</label><br>
+                <label><input type="checkbox" name="notifications" value="dafYomi" {{ 'checked' if 'dafYomi' in preferences.notifications else '' }}> Daf Yomi</label><br>
+            </div></label>
+
+            <label for="notificationNumber">Phone Number for Notifications:
+                <input type="tel" name="notificationNumber" id="notificationNumber" value="{{ preferences.notification_number}}">
+            </label>
+
+            <button type="submit" id="savePreferences">Save Preferences</button>
+        </form>
+    </div>
+    <script>
+        $(document).ready(function() {
+            toggleNotificationSection();
+
+            $("#preferencesForm").submit(function(event) {
+                event.preventDefault();
+
+                var notificationNumber = $('#notificationNumber').val();
+                var defaultDate = getDefaultDateSelection();
+                var defaultLocation = $("#defaultLocation").val();
+                var showWeather = $("#showWeather").prop('checked');
+                var language = $("#language").val();
+                var notifications = getNotificationSelection();
+                
+                $.ajax({
+                    url: '/update_preferences',
+                    type: 'POST',
+                    contentType: 'application/json', 
+                    accept: 'application/json',
+                    data: JSON.stringify({
+                        defaultLocation: defaultLocation,
+                        defaultDate: defaultDate,
+                        showWeather: showWeather,
+                        language: language,
+                        notifications: notifications,
+                        notificationNumber: notificationNumber
+                    }),
+                    success: function(response, texStatus, jqXHR) {
+                        console.log(jqXHR.status);
+                        if(jqXHR.status === 304) {
+                            alert("Preferences were not modified.")
+                        } else {
+                            alert("Preferences updated successfully!");
+                        }
+                    },
+                    error: function(error) {
+                        console.error("Error updating preferences:", error);
+                    }
+                });
+            });
+
+            $("#showWeather").change(function() {
+                if ($(this).prop('checked')) {
+                    $("#weatherLabel").text("Yes");
+                } else {
+                    $("#weatherLabel").text("No");
+                }
+            });
+
+            function toggleNotificationSection() {
+                var notificationNumber = $('#notificationNumber').val();
+                var defaultLocation = $("#defaultLocation").val();
+                
+                if (notificationNumber && defaultLocation) {
+                    $("#notificationTypes").show(); // Show notifications section if both are filled
+                } else {
+                    $("#notificationTypes").hide(); // Hide notifications section if either is missing
+                }
+            }
+
+            function getNotificationSelection() {
+                notifications = [];
+                $("input[name='notifications']:checked").each(function() {
+                    notifications.push($(this).val());
+                });
+                return notifications;
+            }
+
+            $('#notificationNumber, #defaultLocation').on('input', function() {
+                toggleNotificationSection();
+            });
+
+            function getDefaultDateSelection() {
+                const selectedOption = $('input[name="defaultDate"]:checked').val();
+                if (selectedOption === 'other') {
+                    dateToSend =  $customDateInput.val();
+                } else {
+                    dateToSend= '';
+                }
+                return {
+                    option: selectedOption, 
+                    date: dateToSend   
+                };
+            }
+
+            const $dateRadios = $('input[name="defaultDate"]');
+            const $customDateInput = $('#customDate');
+            let dateSelection={};
+            $dateRadios.on('change', function() {
+                const selectedOption = $('input[name="defaultDate"]:checked').val();
+                let dateToSend='';
+                if (selectedOption === 'other') {
+                    $customDateInput.show();
+                    $customDateInput.prop('required', true);
+                    dateToSend = $customDateInput.val();
+                } else {
+                    $customDateInput.hide();
+                    $customDateInput.prop('required', false);
+                    $customDateInput.val('');
+                }
+                dateSelection = {
+                    option: selectedOption,
+                    date: dateToSend
+                };
+            });            
+
+        });
+    </script>
+</body>
+</html>

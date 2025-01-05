@@ -1,0 +1,17 @@
+/* Account Content Styling */
+.account-content {
+    margin-left: 220px; /* to account for the sidebar */
+    padding: 20px;
+    text-align: center;
+}
+
+.account-content h2 {
+    font-size: 1.8em;
+    margin-bottom: 15px;
+}
+
+.profile-picture {
+    max-width: 150px;
+    border-radius: 50%;
+    margin-top: 10px;
+}
